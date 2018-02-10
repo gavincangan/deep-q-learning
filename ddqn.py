@@ -8,7 +8,7 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from keras import backend as K
 
-EPISODES = 5000
+EPISODES = 1000
 
 
 class DQNAgent:
@@ -77,19 +77,21 @@ class DQNAgent:
 if __name__ == "__main__":
     env = gym.make('CartPole-v1')
     state_size = env.observation_space.shape[0]
+    print("Obs space: {}, Action space: {}".format(env.observation_space, env.action_space))
     action_size = env.action_space.n
     agent = DQNAgent(state_size, action_size)
-    # agent.load("./save/cartpole-ddqn.h5")
+    agent.load("./save/cartpole-ddqn.h5")
     done = False
     batch_size = 32
 
     for e in range(EPISODES):
         state = env.reset()
+        env.render()
         state = np.reshape(state, [1, state_size])
-        for time in range(500):
-            # env.render()
+        for time in range(5000):
             action = agent.act(state)
             next_state, reward, done, _ = env.step(action)
+            env.render()
             reward = reward if not done else -10
             next_state = np.reshape(next_state, [1, state_size])
             agent.remember(state, action, reward, next_state, done)
@@ -101,5 +103,5 @@ if __name__ == "__main__":
                 break
         if len(agent.memory) > batch_size:
             agent.replay(batch_size)
-        # if e % 10 == 0:
-        #     agent.save("./save/cartpole-ddqn.h5")
+        if e % 10 == 0:
+            agent.save("./save/cartpole-ddqn.h5")
